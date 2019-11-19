@@ -1,0 +1,12 @@
+version: "3.2"
+
+services:
+  postgres:
+    image: pedrorochaorg/xspostgres:latest
+    environment:
+      - POSTGRES_PASSWORD=TwE5]>*Gm^sk_eq)
+      - POSTGRES_USER=contacts
+      - DB_1_NAME=contacts
+    ports:
+      - "5435:5432"
+    restart: always
