@@ -1,9 +1,10 @@
-package contactsApi_test
+package db_test
 
 import (
 	"testing"
 
-	"github.com/pedrorochaorg/contactsApi"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/pedrorochaorg/contactsApi/db"
 )
 
@@ -12,10 +13,11 @@ func TestNewDatabase(t *testing.T) {
 	t.Run("test that we get a blank connection string when sending nil opts", func(t *testing.T) {
 		database := db.NewDatabaseConnection()
 
-		contactsApi.AssertStringEquals(
+		assert.Equal(
 			t,
 			database.GetConnectionString(),
 			"host= port= user= password= dbname= sslmode=",
+			"Connection strings don't match",
 		)
 
 	})
@@ -30,12 +32,13 @@ func TestNewDatabase(t *testing.T) {
 			db.WithSslMode("disable"),
 		)
 
-		contactsApi.AssertStringEquals(
+		assert.Equal(
 			t,
 			database.GetConnectionString(),
 			"host=localhost port=5432 user=user password=123456 dbname=contacts_exercise sslmode=disable",
+			"Connection strings don't match",
 		)
+
 	})
 
 }
-

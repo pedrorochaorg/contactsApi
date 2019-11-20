@@ -25,7 +25,7 @@ func main() {
 
 	defer database.CloseConn()
 
-	server := api.NewAPI(database)
+	server := api.NewAPI(&database)
 
 	log.Println("Starting the webserver in port 3000")
 	if err := http.ListenAndServe(":3000", server); err != nil {

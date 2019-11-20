@@ -26,7 +26,6 @@ type DatabaseRows struct {
 	*sql.Rows
 }
 
-
 // ConnectionString returns a string reperesentation of the databaseOptions object and all it's property values,
 // this string is used to establish the connection with the database server
 func (d *Database) connectionString() string {
@@ -84,8 +83,10 @@ func WithSslMode(sslmode string) DatabaseOpts {
 type DatabaseConnection interface {
 	OpenConn() (bool, error)
 	CloseConn() (bool, error)
-	Query(ctx context.Context, query string) (*DatabaseRows, error)
-	QueryWithArgs(ctx context.Context, query string, args ...interface{}) (*DatabaseRows, error)
+	Insert(ctx context.Context, query string, args ...interface{}) (*DatabaseRows, error)
+	Update(ctx context.Context, query string, args ...interface{}) (*DatabaseRows, error)
+	FetchOne(ctx context.Context, query string, args ...interface{}) (*DatabaseRows, error)
+	FetchAll(ctx context.Context, query string, args ...interface{}) (*DatabaseRows, error)
 	Delete(ctx context.Context, query string, args ...interface{}) (bool, error)
 	Execute(ctx context.Context, query string) (bool, error)
 	GetConnectionString() string
@@ -104,7 +105,6 @@ func (d *Database) OpenConn() (bool, error) {
 	return true, nil
 }
 
-
 // CloseConn closes the existing database connection
 func (d *Database) CloseConn() (bool, error) {
 
@@ -117,18 +117,7 @@ func (d *Database) CloseConn() (bool, error) {
 }
 
 // Query
-func (d *Database) Query(ctx context.Context, query string) (*DatabaseRows, error) {
-
-	rows, err := d.QueryContext(ctx, query)
-	if err != nil {
-		return nil, fmt.Errorf("an error ocurred while executing the query: %s", err)
-	}
-
-	return &DatabaseRows{rows}, nil
-
-}
-
-func (d *Database) QueryWithArgs(ctx context.Context, query string, args ...interface{}) (*DatabaseRows, error) {
+func (d *Database) Insert(ctx context.Context, query string, args ...interface{}) (*DatabaseRows, error) {
 
 	rows, err := d.QueryContext(ctx, query, args ...)
 	if err != nil {
@@ -140,8 +129,45 @@ func (d *Database) QueryWithArgs(ctx context.Context, query string, args ...inte
 }
 
 
+// Query
+func (d *Database) Update(ctx context.Context, query string, args ...interface{}) (*DatabaseRows, error) {
+
+	rows, err := d.QueryContext(ctx, query, args ...)
+	if err != nil {
+		return nil, fmt.Errorf("an error ocurred while executing the query: %s", err)
+	}
+
+	return &DatabaseRows{rows}, nil
+
+}
+
+// Query
+func (d *Database) FetchOne(ctx context.Context, query string, args ...interface{}) (*DatabaseRows, error) {
+
+	rows, err := d.QueryContext(ctx, query, args ...)
+	if err != nil {
+		return nil, fmt.Errorf("an error ocurred while executing the query: %s", err)
+	}
+
+	return &DatabaseRows{rows}, nil
+
+}
+
+// Query
+func (d *Database) FetchAll(ctx context.Context, query string, args ...interface{}) (*DatabaseRows, error) {
+
+	rows, err := d.QueryContext(ctx, query, args ...)
+	if err != nil {
+		return nil, fmt.Errorf("an error ocurred while executing the query: %s", err)
+	}
+
+	return &DatabaseRows{rows}, nil
+
+}
+
+// Delete
 func (d *Database) Delete(ctx context.Context, query string, args ...interface{}) (bool, error) {
-	result, err := d.Exec(query, args...)
+	result, err := d.ExecContext(ctx, query, args...)
 	if err != nil {
 		return false, fmt.Errorf("an error ocurred while executing the query: %s", err)
 	}
@@ -154,6 +180,7 @@ func (d *Database) Delete(ctx context.Context, query string, args ...interface{}
 	return true, nil
 }
 
+// Execute
 func (d *Database) Execute(ctx context.Context, query string) (bool, error) {
 	_, err := d.Exec(query)
 	if err != nil {
@@ -163,14 +190,16 @@ func (d *Database) Execute(ctx context.Context, query string) (bool, error) {
 	return true, nil
 }
 
+
 func (d *Database) GetConnectionString() string {
 	return d.connectionString()
 }
 
-func NewDatabaseConnection(opts ...DatabaseOpts) DatabaseConnection {
-	dbInstance := &Database{}
+
+func NewDatabaseConnection(opts ...DatabaseOpts) Database {
+	dbInstance := Database{}
 	for _, opt := range opts {
-		opt(dbInstance)
+		opt(&dbInstance)
 	}
 
 	return dbInstance
