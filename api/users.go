@@ -40,6 +40,7 @@ func NewUserHandler(db repos.UserRepo) *UserHandler {
 	handler.handlers.Add("/{userId}/contacts/{id}", http.MethodGet, handler.getUserContacts)
 	handler.handlers.Add("/{userId}/shit/{id}", http.MethodGet, handler.getUserContacts)
 
+	log.Println(handler.handlers)
 
 	return handler
 }

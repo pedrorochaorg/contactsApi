@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -17,11 +18,11 @@ const (
 )
 
 type API struct {
-	db db.DatabaseConnection
+	db *sql.DB
 	http.Handler
 }
 
-func NewAPI(db db.DatabaseConnection) *API {
+func NewAPI(db *sql.DB) *API {
 	handler := new(API)
 
 	handler.db = db
@@ -38,11 +39,11 @@ func NewAPI(db db.DatabaseConnection) *API {
 	return handler
 }
 
-func initDB(database db.DatabaseConnection) {
+func initDB(database *sql.DB) {
 
 	log.Println("Initializing database")
 	for _, stmt := range db.InitStatements {
-		_, err := database.Execute(context.Background(), stmt)
+		_, err := database.ExecContext(context.Background(), stmt)
 		if err != nil {
 			log.Fatalf("failed to execute statement in database: %s, %s", stmt, err)
 		}

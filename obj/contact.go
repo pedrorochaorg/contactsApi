@@ -17,6 +17,8 @@ type Contact struct {
 }
 
 func (c Contact) String() string {
-	return fmt.Sprintf("ID=%d UserID=%d FirstName=%s LastName=%s Email=%s Phone=%s", c.ID, c.UserID, c.FirstName,
-		c.LastName, c.Email, c.Phone)
+	return fmt.Sprintf("ID=%d UserID=%d FirstName=%s LastName=%s Email=%s Phone=%s CreatedAt=%s UpdatedAt=%s", c.ID,
+		c.UserID,
+		c.FirstName,
+		c.LastName, c.Email, c.Phone, c.CreatedAt, c.UpdatedAt)
 }

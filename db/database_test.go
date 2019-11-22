@@ -15,7 +15,7 @@ func TestNewDatabase(t *testing.T) {
 
 		assert.Equal(
 			t,
-			database.GetConnectionString(),
+			database.ConnectionString(),
 			"host= port= user= password= dbname= sslmode=",
 			"Connection strings don't match",
 		)
@@ -34,7 +34,7 @@ func TestNewDatabase(t *testing.T) {
 
 		assert.Equal(
 			t,
-			database.GetConnectionString(),
+			database.ConnectionString(),
 			"host=localhost port=5432 user=user password=123456 dbname=contacts_exercise sslmode=disable",
 			"Connection strings don't match",
 		)

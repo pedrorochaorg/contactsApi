@@ -20,17 +20,34 @@ type Handler struct {
 type Handlers []Handler
 
 // Add's a handler struct to a slice of handlers spliting the path in the character '/'
-func (h Handlers) Add(path, method string,fn func(w http.ResponseWriter, r UrlRequest)) {
+func (h *Handlers) Add(path, method string,fn func(w http.ResponseWriter, r UrlRequest)) {
+
+	if strings.Index(path, "/") == 0 {
+		path = path[1:]
+	}
+
+	if len(path) > 1 && strings.LastIndex(path, "/") == (len(path) - 1) {
+		path = path[0:len(path)-1]
+	}
+
+	if path == "" {
+		*h = append(*h, Handler{
+			path: path,
+			handler: fn,
+			method: method,
+		})
+	}
 
 	// Slices the path string when it find's the char '/'
 	pathSliced := strings.Split(path, "/")
+
 	// Returns 3 slices each of of them containing: a slice containing the path parameters excluding the
 	// variable placeholders; the index of each variable placeholder in the pathSliced slice; a slice
 	// containing the name of each variable found in the pathSliced slice ( the value between the characters '{}' )
 	pathWithoutVars, pathVarIndexes, pathVars := splitVarsFromStaticPathParameters(pathSliced)
 
 
-	h = append(h, Handler{
+	*h = append(*h, Handler{
 		path,
 		fn,
 		method,
@@ -89,6 +106,14 @@ func (e pathParamsIndexes) Contains(val int) int {
 // '/{id}/contacts/{contactId} this method will return a VarsHandler object with property 'H' having the matching
 // hanlder object and the property 'Vars' a map with {"id": 28, "contactId": 1}
 func (h Handlers) GetByMethodAndType(path, method string) (*VarsHandler, *Error) {
+
+	if strings.Index(path, "/") == 0 {
+		path = path[1:]
+	}
+
+	if len(path) > 1 && strings.LastIndex(path, "/") == (len(path) - 1) {
+		path = path[0:len(path)-1]
+	}
 
 	// split's the path string in a slice ,
 	// if the path string contains a value of 'users/list' the slicedPath should contain a slice of {"users", "list"}
@@ -179,8 +204,13 @@ func verifyPathMatchingAndReturnPathParameterVariables(handler Handler, original
 // variables, the variables removed and the slice indexes were these values were located.
 func splitVarsFromStaticPathParameters(splitedPath []string) (handlerPathWithoutVars []string,
 	handlerPathVarIndexes pathParamsIndexes, handlerPathVarNames []string) {
+
 	// Loops through all slices of the resulting string split executed on the handlerPath content
 	for i, path := range splitedPath {
+		if len(path) == 0 {
+			continue
+		}
+
 		// If the path slice start's and end's with '{' and '}' respectively,
 		// means that this path parameter is a variable and we should store the index of the path parameter in a
 		// slice and store the string that is between the same characters as a var name/id.

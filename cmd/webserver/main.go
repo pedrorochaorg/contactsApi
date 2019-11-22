@@ -1,8 +1,11 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
+
+	_ "github.com/lib/pq"
 
 	"github.com/pedrorochaorg/contactsApi/api"
 	"github.com/pedrorochaorg/contactsApi/db"
@@ -17,15 +20,14 @@ func main() {
 		db.WithPort("5435"),
 		db.WithPassword("TwE5]>*Gm^sk_eq)"),
 	)
-
-	if ok, err := database.OpenConn(); !ok || err !=nil {
-		log.Fatalf("Error while opening a connection to the database: %s", err)
-		return
+	db, err := sql.Open("postgres", database.ConnectionString())
+	if err != nil {
+		log.Fatalf("error starting database connection: %s", err)
 	}
 
-	defer database.CloseConn()
+	defer db.Close()
 
-	server := api.NewAPI(&database)
+	server := api.NewAPI(db)
 
 	log.Println("Starting the webserver in port 3000")
 	if err := http.ListenAndServe(":3000", server); err != nil {
