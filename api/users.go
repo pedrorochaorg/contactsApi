@@ -36,11 +36,6 @@ func NewUserHandler(db repos.UserRepo) *UserHandler {
 	handler.handlers.Add("/{id}", http.MethodGet, handler.getUser)
 	handler.handlers.Add("/{id}", http.MethodPut, handler.updateUser)
 	handler.handlers.Add("/{id}", http.MethodDelete, handler.deleteUser)
-	handler.handlers.Add("/{id}/contacts", http.MethodGet, handler.getUserContacts)
-	handler.handlers.Add("/{userId}/contacts/{id}", http.MethodGet, handler.getUserContacts)
-	handler.handlers.Add("/{userId}/shit/{id}", http.MethodGet, handler.getUserContacts)
-
-	log.Println(handler.handlers)
 
 	return handler
 }
@@ -112,7 +107,7 @@ func (u *UserHandler) getUser(w http.ResponseWriter, r UrlRequest) {
 			return
 	}
 
-	user, err := u.repo.Get(r.R.Context(), int64(userId))
+	user, err := u.repo.Get(r.R.Context(), userId)
 	if err != nil {
 		FailureReply(&Error{msg: UserNotFound, status: 404}, w, r.R)
 		return
@@ -134,7 +129,7 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r UrlRequest) {
 		return
 	}
 
-	user, err := u.repo.Get(r.R.Context(), int64(userId))
+	user, err := u.repo.Get(r.R.Context(), int(userId))
 	if err != nil {
 		FailureReply(&Error{msg: UserNotFound, status: 404}, w, r.R)
 		return
@@ -173,13 +168,13 @@ func (u *UserHandler) deleteUser(w http.ResponseWriter, r UrlRequest) {
 		return
 	}
 
-	_, err = u.repo.Get(r.R.Context(), int64(userId))
+	_, err = u.repo.Get(r.R.Context(), userId)
 	if err != nil {
 		FailureReply(&Error{msg: UserNotFound, status: 404}, w, r.R)
 		return
 	}
 
-	_, err = u.repo.Delete(r.R.Context(), int64(userId))
+	_, err = u.repo.Delete(r.R.Context(), userId)
 	if err != nil {
 		FailureReply(&Error{msg: err.Error(), status: 400}, w, r.R)
 		return
@@ -210,7 +205,7 @@ func (u *UserHandler) getUserContacts(w http.ResponseWriter, r UrlRequest) {
 
 	log.Println("ContactId", contactId)
 
-	user, err := u.repo.Get(r.R.Context(), int64(userId))
+	user, err := u.repo.Get(r.R.Context(), userId)
 	if err != nil {
 		FailureReply(&Error{msg: UserNotFound, status: 404}, w, r.R)
 		return

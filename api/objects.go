@@ -156,13 +156,22 @@ func (h Handlers) GetByMethodAndType(path, method string) (*VarsHandler, *Error)
 
 		// Compares both slice objects and if they are deeply equal and the method is the same we should return this
 		// handler.
-		if reflect.DeepEqual(actualCleanPaths, handlerCleanPaths) && handler.method == method {
+		if compareSlices(actualCleanPaths, handlerCleanPaths) && handler.method == method {
 			return &VarsHandler{H: &handler, Vars: vars}, nil
 		}
 	}
 
 	return nil, &Error{ErrNotFound, http.StatusNotFound}
 }
+
+func compareSlices(actual []string, expected []string) bool {
+	if len(actual) == len(expected) && len(actual) == 0 {
+		return true
+	}
+
+	return reflect.DeepEqual(actual, expected)
+}
+
 
 // Verifies if the number of path parameters present in the request path matches with the number of path parameters
 // of an handler
