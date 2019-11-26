@@ -1,0 +1,56 @@
+version: 2
+jobs:
+  lint:
+    docker:
+      - image: circleci/golang:1.13
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
+      - run:
+          name: Ensure dependencies are installed
+          command: go mod vendor
+
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+      - run:
+          name: Code linting
+          command: |
+            curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.21.0
+            ./bin/golangci-lint run
+  test:
+    docker:
+      - image: circleci/golang:1.13
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
+      - run:
+          name: Ensure dependencies are installed
+          command: go mod vendor
+
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+      # Run unit/integration
+      - run:
+          name: Running unit/integration tests
+          command: |
+            go test -race ./...
+            go test -v -coverprofile coverage.out ./...
+            mkdir -p /tmp/artifacts/coverage/
+            go tool cover -html=coverage.out -o=/tmp/artifacts/coverage/index.html
+      - store_artifacts:
+          path: /tmp/artifacts
+
+workflows:
+  version: 2
+  build-test-and-push:
+    jobs:
+      - lint
+      - test
