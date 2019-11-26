@@ -44,7 +44,7 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	subPath := r.URL.Path[len("/users/"):]
 
-	if subPath[len(subPath)-1:] == "/" {
+	if len(subPath) > 0 && subPath[len(subPath)-1:] == "/" {
 		subPath = subPath[:len(subPath)-1]
 	}
 
@@ -81,7 +81,7 @@ func (u *UserHandler) createUser(w http.ResponseWriter, r UrlRequest) {
 	user := obj.User{}
 	err := json.NewDecoder(r.R.Body).Decode(&user)
 	if err != nil {
-		FailureReply(&Error{msg: err.Error(), status: 500}, w, r.R)
+		FailureReply(&Error{msg: err.Error(), status: 400}, w, r.R)
 		return
 	}
 
@@ -138,7 +138,7 @@ func (u *UserHandler) updateUser(w http.ResponseWriter, r UrlRequest) {
 	updatedUser := obj.User{}
 	err = json.NewDecoder(r.R.Body).Decode(&updatedUser)
 	if err != nil {
-		FailureReply(&Error{msg: err.Error(), status: 500}, w, r.R)
+		FailureReply(&Error{msg: err.Error(), status: 400}, w, r.R)
 		return
 	}
 
@@ -181,7 +181,7 @@ func (u *UserHandler) deleteUser(w http.ResponseWriter, r UrlRequest) {
 	}
 
 	SuccessReply(
-		&Data{status: http.StatusOK, message: UserDeletedSuccessfully, data: nil},
+		&Data{status: http.StatusNoContent, message: UserDeletedSuccessfully, data: nil},
 		w,
 		r.R,
 	)
