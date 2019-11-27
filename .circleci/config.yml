@@ -83,7 +83,7 @@ jobs:
       - run:
           name: Push to Docker Hub
           command: |
-            echo "Pushing docker image to quay.io"
+            echo "Pushing docker image to docker hub"
             docker push pedrorochaorg/${PACKAGENAME}:${GITHASH}
             docker push pedrorochaorg/${PACKAGENAME}:latest_${CIRCLE_BRANCH}
             docker push pedrorochaorg/${PACKAGENAME}:${CIRCLE_BRANCH}_${GITHASH}

@@ -31,7 +31,7 @@ RUN apk update && \
     apk --no-cache add ca-certificates
 
 # Build application with custom ldflags
-RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -mod vendor -o /app ./cmd/server
+RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -mod vendor -o /app ./cmd/webserver
 
 ENTRYPOINT ["/app"]
 
