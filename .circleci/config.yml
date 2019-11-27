@@ -83,6 +83,9 @@ jobs:
       - run:
           name: Push to Docker Hub
           command: |
+            echo "Tagging docker image"
+            docker tag pedrorochaorg/${PACKAGENAME}:${GITHASH} pedrorochaorg/${PACKAGENAME}:latest_${CIRCLE_BRANCH}
+            docker tag pedrorochaorg/${PACKAGENAME}:${GITHASH} pedrorochaorg/${PACKAGENAME}:${CIRCLE_BRANCH}_${GITHASH}
             echo "Pushing docker image to docker hub"
             docker push pedrorochaorg/${PACKAGENAME}:${GITHASH}
             docker push pedrorochaorg/${PACKAGENAME}:latest_${CIRCLE_BRANCH}
