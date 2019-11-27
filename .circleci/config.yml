@@ -47,6 +47,46 @@ jobs:
             go tool cover -html=coverage.out -o=/tmp/artifacts/coverage/index.html
       - store_artifacts:
           path: /tmp/artifacts
+  acr:
+    docker:
+      - image: circleci/golang:1.13
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
+      - run:
+          name: Ensure dependencies are installed
+          command: go mod vendor
+
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+      - run:
+          name: Define environment variables
+          command: |
+            echo 'export PACKAGENAME=$CIRCLE_PROJECT_REPONAME' >> $BASH_ENV
+            echo 'export GITHASH=$CIRCLE_SHA1' >> $BASH_ENV
+            echo 'export APP_VERSION=$CIRCLE_BUILD_NUM' >> $BASH_ENV
+
+      - setup_remote_docker
+      - run:
+          name: Bake docker image
+          command: |
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_LOGIN --password-stdin
+            docker build -t pedrorochaorg/${PACKAGENAME}:${GITHASH} \
+                    --build-arg GITHASH=${GITHASH} \
+                    --build-arg BUILDSTAMP=`date '+%FT%T%z'` \
+                --build-arg APP_VERSION=${APP_VERSION} \
+                .
+      - run:
+          name: Push to Docker Hub
+          command: |
+            echo "Pushing docker image to quay.io"
+            docker push pedrorochaorg/${PACKAGENAME}:${GITHASH}
+            docker push pedrorochaorg/${PACKAGENAME}:latest_${CIRCLE_BRANCH}
+            docker push pedrorochaorg/${PACKAGENAME}:${CIRCLE_BRANCH}_${GITHASH}
 
 workflows:
   version: 2
@@ -54,3 +94,7 @@ workflows:
     jobs:
       - lint
       - test
+      - acr:
+          context: test
+          requires:
+            - test
